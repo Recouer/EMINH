@@ -4,7 +4,6 @@ from typing import Optional
 
 from energy_tier import EnergyTier
 from coil_tier import CoilTier
-from crafting_node import CraftingNode
 
 class CraftingMachine(Enum):
     GREENHOUSE = 0
@@ -40,7 +39,7 @@ class CraftingMachine(Enum):
                 return False
    
     def crafting_speed(self, 
-                       crafting_node : CraftingNode, 
+                       crafting_node, 
                        energy_tier : EnergyTier,
                        coil_tier : Optional[CoilTier]) -> float:
         if energy_tier not in crafting_node.energy_tier:
@@ -60,7 +59,7 @@ class CraftingMachine(Enum):
             return (oveclock_modifier ** (min(crafting_node.tier_specific) - energy_tier)) * crafting_node.crafting_time * coil_modifier
    
     def energy_needed(self, 
-                      crafting_node : CraftingNode, 
+                      crafting_node,
                       energy_tier : EnergyTier, 
                       coil_tier: Optional[CoilTier]) -> int:
         

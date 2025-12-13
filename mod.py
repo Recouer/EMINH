@@ -1266,7 +1266,12 @@ recipee_dict = {
 tree = TreeGenerator(recipee_dict)
 tree.generate_tree(
     "greenhouse_2",
-    [Item.NITROGEN_GAS],
-    lambda x : True,
+    [Item.NITROGEN_GAS, 
+     Item.STEAM, 
+     Item.RHENIUM, 
+     Item.WATER, 
+     Item.HYDROGEN,
+    ],
+    lambda x : x.name != "log_pyrolise_heavy_oil",
 )
-
+tree.draw_graph()

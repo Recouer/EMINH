@@ -2,6 +2,9 @@ from typing import Dict, Set, Callable, Optional
 from collections import defaultdict
 import copy
 
+import pygraphviz as pgv
+
+
 from energy_tier import EnergyTier
 from coil_tier import CoilTier
 from item import Item
@@ -36,6 +39,7 @@ class TreeGenerator:
         self.inputs : Set[Item] = dict()
         
         self.name_correspondance : Dict[str, CraftingNode] = dict()
+        self.graph = pgv.AGraph()
 
         self.output_correspondance : defaultdict[Item, Set[CraftingNode]] = defaultdict(set)
         self.input_correspondance : defaultdict[Item, Set[CraftingNode]] = defaultdict(set)
@@ -59,15 +63,15 @@ class TreeGenerator:
         if crafting_node_name not in self.name_correspondance.keys():
             return IndexError("name not found")
 
-        
-        
-
-
     def generate_roots(self, 
                        recipee_name : str, 
                        filter : Callable[[CraftingNode], bool]):
         pass
 
+    def draw_graph(self):
+        print(self.graph.string())
+        self.graph.layout(prog="dot")
+        self.graph.draw("test.png")
 
     def generate_tree(self,
                       recipee_name : str,
@@ -76,7 +80,7 @@ class TreeGenerator:
         
         craft = copy.deepcopy(self.input_correspondance)
         for recipee_node_list in craft.values():
-            recipee_node_list = {node for node in recipee_node_list if filter(recipee_node_list)}
+            recipee_node_list = {node for node in recipee_node_list if filter(node)}
             for node in recipee_node_list:
                 self.name_correspondance[node.name] = node 
         
@@ -86,8 +90,19 @@ class TreeGenerator:
 
         new_output = set(self.name_correspondance[recipee_name].outputs)
         used_set = set(self.name_correspondance[recipee_name].outputs)
+        
+        
+        self.graph.add_node(recipee_name)
+        self.graph.add_nodes_from([output.name() for output in new_output])
+        for output in self.name_correspondance[recipee_name].outputs:
+            self.graph.add_edge(self.name_correspondance[recipee_name], output.name())
+        for input in inputs:
+            self.graph.add_node(input.name())
+
 
         while new_output:
+            self.graph.add_nodes_from([output.name() for output in new_output])
+
             for item in new_output:
                 self.outputs[item] = 0
             for item in new_output:
@@ -98,8 +113,15 @@ class TreeGenerator:
 
             for item in iterator:
                 for crafting_node in craft.get(item, []):
-                    is_craftable = [item for item in crafting_node.inputs if item in self.outputs.keys()]
-                    if all(is_craftable):
+                    is_craftable = [item in self.outputs.keys() for item in crafting_node.inputs]
+                    if all(is_craftable) and filter(crafting_node):
+                        # add a node in the graph for visualisation
+                        self.graph.add_node(crafting_node.name)
+                        for input in crafting_node.inputs:
+                            self.graph.add_edge(input.name(), crafting_node.name)
+                        for output in crafting_node.outputs:
+                            self.graph.add_edge(crafting_node.name, output.name())
+                        
                         [new_output.add(output) for output in crafting_node.outputs if output not in used_set]
 
 
