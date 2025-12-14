@@ -5,6 +5,8 @@ from typing import Optional
 from energy_tier import EnergyTier
 from coil_tier import CoilTier
 
+from unit_system import Production, ProductionPerTick, Second, Tick, Energy, EnergyPerTick, Constant
+
 class CraftingMachine(Enum):
     GREENHOUSE = 0
     CHEMICAL_REACTOR = 1
@@ -38,39 +40,41 @@ class CraftingMachine(Enum):
             case CraftingMachine.CRACKER:
                 return False
    
-    def crafting_speed(self, 
+    def crafting_time(self, 
                        crafting_node, 
                        energy_tier : EnergyTier,
-                       coil_tier : Optional[CoilTier]) -> float:
-        if energy_tier not in crafting_node.energy_tier:
-            return ValueError("wrong energy tier provided for recipee " + crafting_node.name + " : " + energy_tier)
+                       coil_tier : Optional[CoilTier]) -> Second:
+
+        min_tier = EnergyTier.LV
+        if crafting_node.tier_specific:
+            min_tier = min(crafting_node.tier_specific)
+            if energy_tier not in crafting_node.tier_specific:
+                raise ValueError("wrong energy tier provided for recipee " + crafting_node.name + " : " + energy_tier.name())
        
+
         oveclock_modifier = 2
         if self.overclock():
              oveclock_modifier = 4
-            
+
         coil_modifier = 1.0
         if coil_tier and crafting_node.coil_tier:
-            coil_modifier = coil_tier / max(1.0, min([coil.speedup() for coil in crafting_node.coil_tier]))
+            coil_modifier = coil_tier.speedup() / max(1.0, crafting_node.coil_tier.speedup())
        
-        if crafting_node.tier_specific.empty():
-            return (oveclock_modifier ** (-energy_tier)) * crafting_node.crafting_time * coil_modifier
-        else:
-            return (oveclock_modifier ** (min(crafting_node.tier_specific) - energy_tier)) * crafting_node.crafting_time * coil_modifier
+        return Constant(oveclock_modifier ** (min_tier - energy_tier) * coil_modifier) * crafting_node.crafting_time
    
-    def energy_needed(self, 
+    def energy_needed_modifier(self, 
                       crafting_node,
                       energy_tier : EnergyTier, 
-                      coil_tier: Optional[CoilTier]) -> int:
+                      coil_tier: Optional[CoilTier]) -> Constant:
         
-        if energy_tier not in crafting_node.energy_tier:
-            return ValueError("wrong energy tier provided for recipee " + crafting_node.name + " : " + energy_tier)
+        min_tier = EnergyTier.LV
+        if crafting_node.tier_specific:
+            min_tier = min(crafting_node.tier_specific)
+            if energy_tier not in crafting_node.tier_specific:
+                raise ValueError("wrong energy tier provided for recipee " + crafting_node.name + " : " + energy_tier.name())
        
         coil_modifier = 1.0
         if coil_tier and crafting_node.coil_tier:
             coil_modifier = coil_tier.energy_consumption()
        
-        if crafting_node.tier_specific.empty():
-            return (4 ** energy_tier) * crafting_node.crafting_time * coil_modifier
-        else:
-            return (4 ** (energy_tier - min(crafting_node.tier_specific))) * crafting_node.crafting_time * coil_modifier
+        return Constant((4 ** (energy_tier - min_tier)) * coil_modifier)

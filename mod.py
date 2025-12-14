@@ -11,6 +11,8 @@ from item import Item
 from crafting_machine import CraftingMachine
 from tree_generator import TreeGenerator
 
+import unit_system
+
 recipee_dict = {
     "greenhouse_2" : {
         "crafting_machine" : [ CraftingMachine.GREENHOUSE ],
@@ -21,7 +23,7 @@ recipee_dict = {
         },
         "outputs" : {
             Item.WOOD : 64,
-            Item.SAPPLING : 8,
+            Item.SAPPLING : 16,
         },
         "tier_specific" : [],
         "coil_tier" : None,
@@ -1262,16 +1264,45 @@ recipee_dict = {
     },
 }
 
+filter = lambda x : \
+        (x.name != "log_pyrolise_heavy_oil") and \
+        (x.name != "acetone_chemical") and \
+        (x.name != "low_tier_sappling_macerator")
+
+inputs = [
+    Item.NITROGEN_GAS, 
+    Item.STEAM, 
+    Item.RHENIUM, 
+    Item.WATER, 
+    Item.HYDROGEN,
+]
 
 tree = TreeGenerator(recipee_dict)
-tree.generate_tree(
+[input_corr, output_corr] = tree.generate_tree(
     "greenhouse_2",
-    [Item.NITROGEN_GAS, 
-     Item.STEAM, 
-     Item.RHENIUM, 
-     Item.WATER, 
-     Item.HYDROGEN,
-    ],
-    lambda x : x.name != "log_pyrolise_heavy_oil",
+    inputs,
+    filter,
 )
+tree.equalize(
+    "greenhouse_2", 1, EnergyTier.EV, CoilTier.KANTHAL, input_corr, output_corr,
+    inputs,
+    filter,
+)
+tree.draw_another_graph(
+    output_corr, input_corr
+)
+
+for [object, value] in tree.energy_consumption.items():
+    print(object.name, value)
+
+print("\n")
+
+for [object, value] in tree.outputs.items():
+    if (value > unit_system.ProductionPerTick(0.0)):
+        print(object.name(), value)
+
 tree.draw_graph()
+tree.yet_another_graph(
+    inputs,
+    output_corr, 
+    input_corr)
