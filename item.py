@@ -1,5 +1,7 @@
 from enum import Enum
 
+from unit_system import EnergyPerProduction
+
 class Item(Enum):
     WOOD = 0
     SAPPLING = 1
@@ -209,50 +211,28 @@ class Item(Enum):
                 return True
         return False
    
-    def fuel_per_mb(self) -> int:
+    def energy_per_mb(self) -> EnergyPerProduction:
         match self:
-            case Item.BUTANE:
-                return 296
-            case Item.BUTENE:
-                return 256
-            case Item.SULFURIC_GAS:
-                return 25
-            case Item.REFINERY_GAS:
-                return 160
-            case Item.PROPANE:
-                return 232
-            case Item.PROPENE:
-                return 192
-            case Item.LPG:
-                return 320
-            case Item.METHANE_GAS:
-                return 112
-            case Item.BUTADIENE:
-                return 204
-            case Item.BENZENE:
-                return 352
-            case Item.PHENOL:
-                return 288
-            case Item.SYNGAS:
-                return 128
-            case Item.ETHYLENE:
-                return 128
-            case Item.ETHANE:
-                return 168
-            case Item.REFORMATE_GAS:
-                return 384
-            
-            case Item.ETHANOL:
-                return 192
-            case Item.LIGHT_FUEL:
-                return 320
-            case Item.NAPHTA:
-                return 320
-            case Item.METHANOL:
-                return 64
-            case Item.HIGH_OCTANE_GASOLINE:
-                return 3200
-            case Item.OCTANE:
-                return 80
+            case Item.BUTANE:               return EnergyPerProduction(296)
+            case Item.BUTENE:               return EnergyPerProduction(256)
+            case Item.SULFURIC_GAS:         return EnergyPerProduction(25)
+            case Item.REFINERY_GAS:         return EnergyPerProduction(160)
+            case Item.PROPANE:              return EnergyPerProduction(232)
+            case Item.PROPENE:              return EnergyPerProduction(192)
+            case Item.LPG:                  return EnergyPerProduction(320)
+            case Item.METHANE_GAS:          return EnergyPerProduction(112)
+            case Item.BUTADIENE:            return EnergyPerProduction(204)
+            case Item.BENZENE:              return EnergyPerProduction(352)
+            case Item.PHENOL:               return EnergyPerProduction(288)
+            case Item.SYNGAS:               return EnergyPerProduction(128)
+            case Item.ETHYLENE:             return EnergyPerProduction(128)
+            case Item.ETHANE:               return EnergyPerProduction(168)
+            case Item.REFORMATE_GAS:        return EnergyPerProduction(384)
+            case Item.ETHANOL:              return EnergyPerProduction(192)
+            case Item.LIGHT_FUEL:           return EnergyPerProduction(320)
+            case Item.NAPHTA:               return EnergyPerProduction(320)
+            case Item.METHANOL:             return EnergyPerProduction(64)
+            case Item.HIGH_OCTANE_GASOLINE: return EnergyPerProduction(3200)
+            case Item.OCTANE:               return EnergyPerProduction(80)
         
-        return 0
+        return EnergyPerProduction(0)

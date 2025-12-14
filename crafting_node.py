@@ -28,18 +28,12 @@ class CraftingNode:
                              energy_tier : EnergyTier,
                              default_coil_tier: CoilTier,
                              input_corr : Union[int, defaultdict[Item, set]],) -> tuple[EnergyPerTick, Constant]:
-        
+
         if isinstance(input_corr, int):
             for output in self.outputs:
                 outputs[output] = Constant(input_corr) * self.outputs[output] / self.crafting_machine[0].crafting_time(self, energy_tier, default_coil_tier)
             for input in self.inputs:
                 inputs[input] = Constant(input_corr) * self.inputs[input] / self.crafting_machine[0].crafting_time(self, energy_tier, default_coil_tier)
-            
-            print("\n\n")
-            for item in self.outputs:
-                print(item, outputs[item].value)
-            for input in self.inputs:
-                print(input, inputs[input].value)
         
             return [
                 self.crafting_machine[0]
@@ -49,31 +43,21 @@ class CraftingNode:
                 Constant(input_corr)
             ]
         else:
-            other_nodes = 0
+            nb_of_machines : Constant = Constant(1000000)
             for input in self.inputs:
-                other_nodes = max(other_nodes, len(input_corr[input]))
+                nb_of_machines = min(
+                    nb_of_machines, 
+                    ((outputs[input]) * self.crafting_time) / (Constant(len(input_corr[input])) * self.inputs[input])
+                )
             
-            nb_of_machines : Constant = min([
-                ((outputs[input]) * self.crafting_time) / (Constant(other_nodes) * self.inputs[input])
-                for input in self.inputs
-            ])
+            # what happens when one input that isn't critical has multiple output connection ?
+            
 
             for input in self.inputs:
                 inputs[input] = inputs[input] + nb_of_machines * self.inputs[input] / self.crafting_time
 
             for output in self.outputs:
                 outputs[output] = outputs[output] + nb_of_machines * self.outputs[output] / self.crafting_time
-
-            if self.name == "AroFeed_chemical" or \
-                self.name == "charcoal_coal_liquefaction" or \
-                self.name == "refAroFeed_chemical":
-                pass
-            print("\n\n")
-            print(nb_of_machines.value)
-            for item in self.outputs:
-                print(item, outputs[item].value)
-            for input in self.inputs:
-                print(input, inputs[input].value)
 
             return [
                 self.crafting_machine[0].energy_needed_modifier(self, self.min_tier(), default_coil_tier) 

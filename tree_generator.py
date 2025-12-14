@@ -12,36 +12,18 @@ from item import Item
 from crafting_machine import CraftingMachine
 from crafting_node import CraftingNode
 
-# class CraftingMachineNode:
-#     def __init__(self, 
-#                  crafting_node: CraftingNode,
-#                  crafting_machine : CraftingMachine,
-#                  number_of_machines : int,
-#                  energy_tier: EnergyTier,
-#                  coil_tier: CoilTier,):
-        
-#         if crafting_machine not in crafting_node.crafting_machine:
-#             raise KeyError("crafting machine not in available crafting nodes.")
-
-#         self.crafting_machine: CraftingMachine = crafting_machine
-#         self.crafting_node: CraftingNode = crafting_node
-#         self.number_of_machines :  int = number_of_machines
-#         self.energy_tier : EnergyTier = energy_tier
-#         self.coil_tier : CoilTier = coil_tier
-    
-#     def energy_consumption(self):
-#         return self.number_of_machines * self.crafting_node.crafting_machine
 
 class debug:
-    def __init__(self, dict: Dict):
+    def __init__(self, dict: Dict, name : str):
         self.dict = dict
+        self.name = name
     
     def __getitem__(self, object):
-        print(f"getting object {object}")
+        # print(f"{self.name} : getting object {object} with value {self.dict[object].value}")
         return self.dict[object]
     
     def __setitem__(self, object, value):
-        print(f"setting object {object} which had value {self.dict[object].value} with value {value.value}" )
+        # print(f"{self.name} : setting object {object} which had value {self.dict[object].value} with value {value.value}" )
         self.dict[object] = value
 
 class TreeGenerator:
@@ -87,7 +69,7 @@ class TreeGenerator:
         for input in inputs:
             self.outputs[input] = ProductionPerTick(100000000)
         
-        craft = copy.deepcopy(self.input_correspondance)
+        craft = copy.deepcopy(input_corr)
         for recipee_node_list in craft.values():
             recipee_node_list = {node for node in recipee_node_list if filter(node)}
             for node in recipee_node_list:
@@ -99,8 +81,8 @@ class TreeGenerator:
             used_set.add(input)
 
         [energy, machines] = self.name_correspondance[recipee_name].compute_throughput(
-            debug(self.outputs),
-            debug(self.consumed),
+            debug(self.outputs, "output"),
+            debug(self.consumed, "consumed"),
             energy_tier,
             default_coil_tier,
             number_of_machines,
@@ -118,24 +100,29 @@ class TreeGenerator:
             iterator = copy.deepcopy(new_output)
             new_output.clear()
 
+            used_node : Set[CraftingNode] = set()
+
             for item in iterator:
                 for crafting_node in craft.get(item, []):
+
                     is_craftable = [item in self.outputs.keys() for item in crafting_node.inputs]
                     if all(is_craftable) and filter(crafting_node):
                         # add a node in the graph for visualisation
                         for output in crafting_node.outputs: 
                             if output not in used_set:
                                 new_output.add(output)
-                        if crafting_node.name != recipee_name:
+                        if crafting_node.name != recipee_name and crafting_node not in used_node:
                             [energy, machines] = crafting_node.compute_throughput(
-                                debug(self.outputs),
-                                debug(self.consumed),
+                                debug(self.outputs, "output"),
+                                debug(self.consumed, "consumed"),
                                 energy_tier,
                                 default_coil_tier,
                                 input_corr,
                             )
                             self.energy_consumption[crafting_node] = energy
                             self.number_of_machines[crafting_node.crafting_machine[0]] = machines
+                            used_node.add(crafting_node)
+                            
 
 
     def generate_roots(self, 
@@ -175,7 +162,7 @@ class TreeGenerator:
             if output in inputs:
                 output_value = Constant(-100000000) + output_value
             input_value = self.consumed[output]
-            graph.add_node(output.name(), label=f"{output.name()} {round((output_value).value, 2)}")
+            graph.add_node(output.name(), label=f"{output.name()} {round((output_value - input_value).value, 2)}")
             for node in nodes:
                 graph.add_node(node.name)
 
@@ -249,5 +236,25 @@ class TreeGenerator:
 
         return [input_corr, output_corr]
 
+    def get_energy(self):
+        total_power : EnergyPerTick = EnergyPerTick(0)
+
+        for output in self.outputs.keys():
+            if output.is_fuel():
+                total_power += output.energy_per_mb() * self.outputs[output]
+                print(output.name(), " : ", 
+                      self.outputs[output], " : ", 
+                      output.energy_per_mb(), " : ", 
+                      (output.energy_per_mb() * self.outputs[output]))
+        
+        print("energy generation is", total_power)
+    
+    def get_consumption(self):
+        total_power : EnergyPerTick = EnergyPerTick(0)
+
+        for _, energy_consumption in self.energy_consumption.items():
+            total_power += energy_consumption
+        
+        print("energy consumption is : ", total_power.value)
 
 

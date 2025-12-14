@@ -9,6 +9,7 @@ def check_initialisation(value):
             or isinstance(value, Production) \
             or isinstance(value, ProductionPerTick) \
             or isinstance(value, Energy) \
+            or isinstance(value, EnergyPerProduction) \
             or isinstance(value, EnergyPerTick):
 
             raise ValueError("wrong type provided : ", type(value))
@@ -17,6 +18,9 @@ class Second:
     def __init__(self, value):
         check_initialisation(value)
         self.value = value
+
+    def __repr__(self):
+        return str(self.value)
     
     def __add__(self, other):
         if isinstance(other, Second):               return Second(self.value + other.value)
@@ -54,6 +58,9 @@ class Tick:
     def __init__(self, value):
         check_initialisation(value)
         self.value = value
+
+    def __repr__(self):
+        return str(self.value)
 
     def __add__(self, other):
         if isinstance(other, Tick):                 return Tick(self.value + other.value)
@@ -123,6 +130,9 @@ class ProductionPerTick:
     def __init__(self, value=0):
         check_initialisation(value)
         self.value = value
+
+    def __repr__(self):
+        return str(self.value)
     
     def __add__(self, other):
         if isinstance(other, ProductionPerTick):    return ProductionPerTick(self.value + other.value)
@@ -189,6 +199,9 @@ class EnergyPerTick:
     def __init__(self, value):
         check_initialisation(value)
         self.value = value
+
+    def __repr__(self):
+        return str(self.value)
     
     def __add__(self, other):
         if isinstance(other, EnergyPerTick):        return EnergyPerTick(self.value + other.value)
@@ -219,10 +232,51 @@ class EnergyPerTick:
         if isinstance(other, EnergyPerTick):        return self.value > other.value
         raise TypeError("wrong type provided : ", type(other))
 
+class EnergyPerProduction:
+    def __init__(self, value):
+        check_initialisation(value)
+        self.value = value
+
+    def __repr__(self):
+        return str(self.value)
+    
+    def __add__(self, other):
+        if isinstance(other, EnergyPerProduction):  return EnergyPerProduction(self.value + other.value)
+        raise TypeError("wrong type provided : ", type(other))
+    
+    def __sub__(self, other):
+        if isinstance(other, EnergyPerProduction):  return EnergyPerProduction(self.value - other.value)
+        raise TypeError("wrong type provided : ", type(other))
+    
+    def __mul__(self, other):
+        if isinstance(other, Production):           return Energy(self.value * other.value)
+        if isinstance(other, ProductionPerTick):    return EnergyPerTick(self.value * other.value)
+        raise TypeError("wrong type provided : ", type(other))
+    
+    def __truediv__(self, other):
+        if isinstance(other, EnergyPerProduction):  return Constant(self.value / other.value)
+        raise TypeError("wrong type provided : ", type(other))
+    
+    def __eq__(self, other):
+        if isinstance(other, EnergyPerProduction):  return self.value == other.value
+        raise TypeError("wrong type provided : ", type(other))
+    
+    def __lt__(self, other):
+        if isinstance(other, EnergyPerProduction):  return self.value < other.value
+        raise TypeError("wrong type provided : ", type(other))
+    
+    def __gt__(self, other):
+        if isinstance(other, EnergyPerProduction):  return self.value > other.value
+        raise TypeError("wrong type provided : ", type(other))
+
+
 class Constant:
     def __init__(self, value):
         check_initialisation(value)
         self.value = value
+    
+    def __repr__(self):
+        return str(self.value)
 
     def __add__(self, other):
         if isinstance(other, Constant):             return Constant(self.value + other.value)
@@ -232,6 +286,7 @@ class Constant:
         if isinstance(other, ProductionPerTick):    return ProductionPerTick(self.value + other.value)
         if isinstance(other, Energy):               return Energy(self.value + other.value)
         if isinstance(other, EnergyPerTick):        return EnergyPerTick(self.value + other.value)
+        if isinstance(other, EnergyPerProduction):  return EnergyPerProduction(self.value + other.value)
         raise TypeError("type not found : ", type(other))
     
     def __sub__(self, other):
@@ -242,6 +297,7 @@ class Constant:
         if isinstance(other, ProductionPerTick):    return ProductionPerTick(self.value - other.value)
         if isinstance(other, Energy):               return Energy(self.value - other.value)
         if isinstance(other, EnergyPerTick):        return EnergyPerTick(self.value - other.value)
+        if isinstance(other, EnergyPerProduction):  return EnergyPerProduction(self.value - other.value)
         raise TypeError("type not found : ", type(other))
     
     def __mul__(self, other):
@@ -252,6 +308,7 @@ class Constant:
         if isinstance(other, ProductionPerTick):    return ProductionPerTick(self.value * other.value)
         if isinstance(other, Energy):               return Energy(self.value * other.value)
         if isinstance(other, EnergyPerTick):        return EnergyPerTick(self.value * other.value)
+        if isinstance(other, EnergyPerProduction):  return EnergyPerProduction(self.value * other.value)
         raise TypeError("type not found : ", type(other))
     
     def __truediv__(self, other):
@@ -262,6 +319,7 @@ class Constant:
         if isinstance(other, ProductionPerTick):    return ProductionPerTick(self.value / other.value)
         if isinstance(other, Energy):               return Energy(self.value / other.value)
         if isinstance(other, EnergyPerTick):        return EnergyPerTick(self.value / other.value)
+        if isinstance(other, EnergyPerProduction):  return EnergyPerProduction(self.value / other.value)
         raise TypeError("type not found : ", type(other))
     
     def __eq__(self, other):

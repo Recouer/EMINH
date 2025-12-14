@@ -1264,8 +1264,12 @@ recipee_dict = {
     },
 }
 
+        # (x.name != "AroFeed_chemical") and \
+        # (x.name != "log_pyrolise_creosote") and \
+        # (x.name != "log_pyrolise_wood_tar") and \
 filter = lambda x : \
         (x.name != "log_pyrolise_heavy_oil") and \
+        (x.name != "compressor_sappling") and \
         (x.name != "acetone_chemical") and \
         (x.name != "low_tier_sappling_macerator")
 
@@ -1292,17 +1296,70 @@ tree.draw_another_graph(
     output_corr, input_corr
 )
 
-for [object, value] in tree.energy_consumption.items():
-    print(object.name, value)
-
-print("\n")
-
-for [object, value] in tree.outputs.items():
-    if (value > unit_system.ProductionPerTick(0.0)):
-        print(object.name(), value)
-
 tree.draw_graph()
 tree.yet_another_graph(
     inputs,
     output_corr, 
     input_corr)
+
+tree.get_consumption()
+tree.get_energy()
+
+
+########################################################################
+########################################################################
+
+## Energy consumption and production of wood processing at EV
+
+# energy consumption is :  3971.072
+# energy generation is 41092.26666666666
+
+# FUEL : mb_per_t : EU_per_mb : EU
+# PHENOL  :  1.2  :  288  :  345.59999999999997
+# BENZENE  :  5.6  :  352  :  1971.1999999999998
+# SYNGAS  :  46.93333333333333  :  128  :  6007.466666666666
+# REFORMATE_GAS  :  85.33333333333333  :  384  :  32768.0
+
+########################################################################
+########################################################################
+
+## Energy consumption and production of wood processing at MV~HV
+## note : divide the values by 4 to get output from one greenhouse at MV
+
+# energy consumption is :  2550.272
+# energy generation is 8324.266666666665
+
+# FUEL : mb_per_t : EU_per_mb : EU
+# PHENOL  :  1.2  :  288  :  345.59999999999997
+# BENZENE  :  5.6  :  352  :  1971.1999999999998
+# SYNGAS  :  46.93333333333332  :  128  :  6007.466666666665
+
+########################################################################
+########################################################################
+
+## Energy consumption and production of sappling processing
+
+# energy consumption is :  3798.9333333333334
+# energy generation is 18585.6
+
+# FUEL : mb_per_t : EU_per_mb : EU
+# ETHANOL  :  26.400000000000002  :  192  :  5068.8
+# METHANE_GAS  :  105.60000000000001  :  112  :  11827.2
+# METHANOL  :  26.400000000000002  :  64  :  1689.6000000000001
+
+########################################################################
+########################################################################
+
+## Total generation for the whole wood processing
+
+# energy consumption is :  6746.0053333333335
+# energy generation is 59677.86666666666
+
+# FUEL : mb_per_t : EU_per_mb : EU
+# SYNGAS  :  46.93333333333332  :  128  :  6007.466666666665
+# PHENOL  :  1.2  :  288  :  345.59999999999997
+# BENZENE  :  5.6  :  352  :  1971.1999999999998
+# METHANOL  :  26.400000000000002  :  64  :  1689.6000000000001
+# ETHANOL  :  26.400000000000002  :  192  :  5068.8
+# METHANE_GAS  :  105.60000000000001  :  112  :  11827.2
+# REFORMATE_GAS  :  85.33333333333331  :  384  :  32767.999999999993
