@@ -89,6 +89,8 @@ class TreeGenerator:
         )
         self.energy_consumption[self.name_correspondance[recipee_name]] = energy
         self.number_of_machines[self.name_correspondance[recipee_name].crafting_machine[0]] = machines
+        print(self.name_correspondance[recipee_name].crafting_machine[0].name, " : ",
+              energy, " : ", machines)
 
 
         while new_output:
@@ -122,6 +124,7 @@ class TreeGenerator:
                             self.energy_consumption[crafting_node] = energy
                             self.number_of_machines[crafting_node.crafting_machine[0]] = machines
                             used_node.add(crafting_node)
+                            print(crafting_node.crafting_machine[0].name, " : ", energy, " : ", machines, " : ", crafting_node.tier_specific)
                             
 
 
@@ -252,7 +255,8 @@ class TreeGenerator:
     def get_consumption(self):
         total_power : EnergyPerTick = EnergyPerTick(0)
 
-        for _, energy_consumption in self.energy_consumption.items():
+        for crafting_node, energy_consumption in self.energy_consumption.items():
+            # print(crafting_node.name, " : ", crafting_node.energy_consumption, " : ", crafting_node.crafting_machine[0].name)
             total_power += energy_consumption
         
         print("energy consumption is : ", total_power.value)

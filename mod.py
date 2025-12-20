@@ -161,7 +161,7 @@ recipee_dict = {
     "charcoal_coal_liquefaction" : {
         "crafting_machine" : [ CraftingMachine.COAL_LIQUEFACTION_TOWER ],
         "energy_consumption" : 60,
-        "crafting_time" : 50,
+        "crafting_time" : 32,
         "inputs" : {
             Item.CHARCOAL : 40,
             Item.CREOSOTE : 4000,
@@ -1264,13 +1264,13 @@ recipee_dict = {
     },
 }
 
-        # (x.name != "AroFeed_chemical") and \
         # (x.name != "log_pyrolise_creosote") and \
         # (x.name != "log_pyrolise_wood_tar") and \
+        # (x.name != "AroFeed_chemical") and \
 filter = lambda x : \
         (x.name != "log_pyrolise_heavy_oil") and \
-        (x.name != "compressor_sappling") and \
         (x.name != "acetone_chemical") and \
+        (x.name != "compressor_sappling") and \
         (x.name != "low_tier_sappling_macerator")
 
 inputs = [
@@ -1279,6 +1279,7 @@ inputs = [
     Item.RHENIUM, 
     Item.WATER, 
     Item.HYDROGEN,
+    Item.NITROUS_OXIDE,
 ]
 
 tree = TreeGenerator(recipee_dict)
@@ -1288,10 +1289,13 @@ tree = TreeGenerator(recipee_dict)
     filter,
 )
 tree.equalize(
-    "greenhouse_2", 1, EnergyTier.EV, CoilTier.KANTHAL, input_corr, output_corr,
+    "greenhouse_2", 1, EnergyTier.EV, CoilTier.NICHROME, input_corr, output_corr,
     inputs,
     filter,
 )
+
+print("\n\n\n")
+
 tree.draw_another_graph(
     output_corr, input_corr
 )

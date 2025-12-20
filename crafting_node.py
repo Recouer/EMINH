@@ -45,19 +45,20 @@ class CraftingNode:
         else:
             nb_of_machines : Constant = Constant(1000000)
             for input in self.inputs:
+
                 nb_of_machines = min(
                     nb_of_machines, 
-                    ((outputs[input]) * self.crafting_time) / (Constant(len(input_corr[input])) * self.inputs[input])
+                    ((outputs[input]) * self.crafting_machine[0].crafting_time(self, energy_tier, default_coil_tier)) / (Constant(len(input_corr[input])) * self.inputs[input])
                 )
             
             # what happens when one input that isn't critical has multiple output connection ?
             
 
             for input in self.inputs:
-                inputs[input] = inputs[input] + nb_of_machines * self.inputs[input] / self.crafting_time
+                inputs[input] = inputs[input] + nb_of_machines * self.inputs[input] / self.crafting_machine[0].crafting_time(self, energy_tier, default_coil_tier)
 
             for output in self.outputs:
-                outputs[output] = outputs[output] + nb_of_machines * self.outputs[output] / self.crafting_time
+                outputs[output] = outputs[output] + nb_of_machines * self.outputs[output] / self.crafting_machine[0].crafting_time(self, energy_tier, default_coil_tier)
 
             return [
                 self.crafting_machine[0].energy_needed_modifier(self, self.min_tier(), default_coil_tier) 
